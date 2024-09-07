@@ -1,6 +1,10 @@
 from rest_framework import mixins, generics
+from rest_framework.authentication import TokenAuthentication
 from .serializers import BookSerializer, AuthorSerializer
 from .models import Author, Book
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.response import Response
 
 
 class BookListView(generics.ListAPIView):
@@ -8,12 +12,32 @@ class BookListView(generics.ListAPIView):
     serializer_class = BookSerializer
 
 
-class BookCreateView(generics.CreateAPIView):
+class BookListView(APIView):
+    Authentication_classes = [TokenAuthentication]
+    Permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        queryset = Book.objects.all()
+        serializer = BookSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class BookDetailView(generics.RetrieveAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
 
-class BookDetailView(generics.RetrieveAPIView):
+class BookDetailView(APIView):
+    Authentication_classes = [TokenAuthentication]
+    Permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        queryset = Book.objects.all()
+        serializer = BookSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class BookCreateView(generics.CreateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
@@ -41,3 +65,10 @@ class CustomBookCreateUpdateView(
 
     def get(self, request, *args, **kwargs):
         return self.update(self, request, *args, **kwargs)
+
+
+class PostCreateUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsAuthenticatedOrReadOnly]
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer

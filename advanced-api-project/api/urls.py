@@ -22,3 +22,6 @@ urlpatterns = [
         name="create-update",
     ),
 ]
+
+
+
