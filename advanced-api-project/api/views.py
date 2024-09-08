@@ -1,4 +1,4 @@
-from rest_framework import mixins, generics
+from rest_framework import generics, mixins
 from rest_framework.authentication import TokenAuthentication
 from .serializers import BookSerializer, AuthorSerializer
 from .models import Author, Book
@@ -72,3 +72,36 @@ class PostCreateUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated, IsAuthenticatedOrReadOnly]
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+
+
+
+# filter the book list by various attributes like title, author, and publication_year.
+
+from django_filters.rest_framework import DjangoFilterBackend
+
+class BookList(generics.ListAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    filter_backends = DjangoFilterBackend
+    filter_fields = ["title", "author", "publication_year"]
+
+
+# search functionality on title and author.
+
+from rest_framework import filters
+class BookListView(generics.ListAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['title', 'author']
+
+
+
+# order the results by any field of the Book model, title and publication_year.
+
+class BookListView(generics.ListAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['title', 'publication_year']
+    ordering = ['title']
