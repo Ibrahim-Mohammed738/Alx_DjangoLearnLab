@@ -1,0 +1,7 @@
+<!-- register.html -->
+
+<form method="POST">
+    {% csrf_token %}  <!-- Django's CSRF protection token -->
+    {{ form.as_p }}  <!-- Render the form fields in paragraph format -->
+    <button type="submit">Register</button>
+</form>

@@ -1,0 +1,6 @@
+<h2>Manage Profile</h2>
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}  <!-- Renders the profile form fields (like pic, address, country) -->
+    <button type="submit">Update Profile</button>
+</form>
