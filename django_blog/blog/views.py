@@ -1,7 +1,16 @@
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect, render
 from django.http import HttpResponse
-from .forms import UserCreationForm, ProfileForm
+from .forms import UserCreationForm, ProfileForm, PostForm
+from django.views.generic import (
+    ListView,
+    DetailView,
+    UpdateView,
+    DeleteView,
+    CreateView,
+)
+from .models import Post
+from django.urls import reverse_lazy
 
 
 def login_view(request):
@@ -49,3 +58,37 @@ def profile_view(request):
             instance=user.profile
         )  # Pre-fill form with the user's current profile info
     return render(request, "profile.html", {"form": form})
+
+
+class PostListView(ListView):
+    model = Post
+
+    template_name = "blog/Listview.html"
+
+
+class PostDetailView(DetailView):
+    model = Post
+    template_name = "blog/Detailview.html"
+
+
+class PostUpdateView(UpdateView):
+    model = Post
+    template_name = "blog/UpdateView.html"
+    form_class = PostForm
+    success_url = reverse_lazy('post-list')
+
+
+class PostDeleteView(DeleteView):
+    model = Post
+    template_name = "blog/DeleteView.html"
+
+
+class PostCreateView(CreateView):
+    model = Post
+    template_name = "blog/CreateView.html"
+    form_class = PostForm
+    success_url = reverse_lazy("post-list")
+
+    def form_valid(self, form):
+        form.save(user=self.request.user)
+        return super().form_valid(form)

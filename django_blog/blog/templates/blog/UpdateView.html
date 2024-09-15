@@ -1,0 +1,17 @@
+<!-- blog/UpdateView.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Post</title>
+</head>
+<body>
+    <h1>Edit Post: {{ object.title }}</h1> <!-- Pre-filled data from the object -->
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Update Post</button>
+    </form>
+    <a href="{% url 'post-detail' object.pk %}">Cancel</a> <!-- Cancel goes back to the detail page -->
+</body>
+</html>

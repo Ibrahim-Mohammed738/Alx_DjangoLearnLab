@@ -1,0 +1,18 @@
+<!-- blog/Detailview.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ object.title }}</title>
+</head>
+<body>
+    <h1>{{ object.title }}</h1> <!-- object is the post provided by DetailView -->
+    <p>{{ object.content }}</p>
+    <p>Published on: {{ object.published_date }}</p>
+    
+    <a href="{% url 'post-update' object.pk %}">Edit Post</a> |
+    <a href="{% url 'post-delete' object.pk %}">Delete Post</a> |
+    <a href="{% url 'post-list' %}">Back to Posts</a>
+</body>
+</html>
+

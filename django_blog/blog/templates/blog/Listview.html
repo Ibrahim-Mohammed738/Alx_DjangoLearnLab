@@ -1,0 +1,20 @@
+<!-- blog/Listview.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog Posts</title>
+</head>
+<body>
+    <h1>All Blog Posts</h1>
+    <ul>
+        {% for post in object_list %} <!-- object_list is the context provided by ListView -->
+            <li>
+                <a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a><br>
+                <p>{{ post.content|slice:":100" }}...</p> <!-- Display a brief snippet of content -->
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'post-create' %}">Create a New Post</a>
+</body>
+</html>

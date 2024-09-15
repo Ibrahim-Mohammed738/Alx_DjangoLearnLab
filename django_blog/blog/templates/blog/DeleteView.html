@@ -1,0 +1,17 @@
+<!-- blog/DeleteView.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delete Post</title>
+</head>
+<body>
+    <h1>Delete Post: {{ object.title }}</h1>
+    <p>Are you sure you want to delete this post?</p>
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit">Confirm Delete</button>
+    </form>
+    <a href="{% url 'post-detail' object.pk %}">Cancel</a>
+</body>
+</html>

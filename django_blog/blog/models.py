@@ -13,3 +13,5 @@ class Profile(models.Model):
     pic = models.URLField()
     adress = models.CharField(max_length=255, null=True, blank=True)
     country = models.CharField(max_length=25, null=True, blank=True)
+
+
