@@ -1,10 +1,11 @@
 from collections.abc import Callable
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.http import HttpResponse
-from .forms import UserCreationForm, ProfileForm, PostForm
+from .forms import UserCreationForm, ProfileForm, PostForm, CommentForm
 from django.views.generic import (
     ListView,
     DetailView,
@@ -12,7 +13,7 @@ from django.views.generic import (
     DeleteView,
     CreateView,
 )
-from .models import Post
+from .models import Post, Comment
 from django.urls import reverse_lazy
 
 
@@ -104,3 +105,20 @@ class PostCreateView(CreateView):
     def form_valid(self, form):
         form.save(user=self.request.user)
         return super().form_valid(form)
+
+
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = "blog/comment_form.html"
+
+    def form_valid(self, form):
+        form.instance.author = (
+            self.request.user
+        )  # Set the comment author to the current user
+        post = get_object_or_404(Post, pk=self.kwargs["post_id"])
+        form.instance.post = post  # Associate the comment with the post
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("post-detail", kwargs={"pk": self.kwargs["post_id"]})

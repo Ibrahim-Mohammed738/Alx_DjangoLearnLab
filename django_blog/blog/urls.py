@@ -10,13 +10,14 @@ from .views import (
 )
 from django.urls import path, include
 from . import views
+from .models import Profile 
 
 
 urlpatterns = [
     path("login/", views.login_view, name="login"),
-    path("logout/", views.login_view, name="logout"),
+    path("logout/", views.logout_view, name="logout"),
     path("register/", views.register, name="register"),
-    path("profile/", views.profile, name="profile"),
+    path("profile/", views.profile_view, name="profile"),
     path("post/", PostListView.as_view(), name="post-list"),
     path("posts/<int:pk>/", PostDetailView.as_view(), name="post-detail"),
     path("post/new/", PostCreateView.as_view(), name="post-create"),

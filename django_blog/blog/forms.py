@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from .models import Profile, Post
+from .models import Comment
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -21,7 +22,7 @@ class ProfileForm(forms.ModelForm):
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        Fields = ["title", "content"]
+        fields = ["title", "content"]
 
     def save(self, commit=True, user=None):
         post = super().save(commit=False)
@@ -30,3 +31,15 @@ class PostForm(forms.ModelForm):
         if commit:
             post.save()
         return post
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content']
+
+    def clean_content(self):
+        content = self.cleaned_data.get('content')
+        if len(content) < 5:
+            raise forms.ValidationError("this comment is short")    
+
+        return content
