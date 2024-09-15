@@ -122,3 +122,27 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse_lazy("post-detail", kwargs={"pk": self.kwargs["post_id"]})
+
+
+class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = "blog/comment_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy("post-detail", kwargs={"pk": self.object.post.pk})
+
+    def test_func(self):
+        comment = self.get_object()
+        return self.request.user == comment.author
+
+    class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+        model = Comment
+        template_name = "blog/comment_confirm_delete.html"
+
+        def get_success_url(self):
+            return reverse_lazy("post-detail", kwargs={"pk": self.object.post.pk})
+
+        def test_func(self):
+            comment = self.get_object()
+            return self.request.user == comment.author
