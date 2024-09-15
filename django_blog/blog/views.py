@@ -1,4 +1,6 @@
+from collections.abc import Callable
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect, render
 from django.http import HttpResponse
 from .forms import UserCreationForm, ProfileForm, PostForm
@@ -62,7 +64,7 @@ def profile_view(request):
 
 class PostListView(ListView):
     model = Post
-
+    context_object_name = "posts"
     template_name = "blog/Listview.html"
 
 
@@ -71,16 +73,25 @@ class PostDetailView(DetailView):
     template_name = "blog/Detailview.html"
 
 
-class PostUpdateView(UpdateView):
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     template_name = "blog/UpdateView.html"
     form_class = PostForm
-    success_url = reverse_lazy('post-list')
+    success_url = reverse_lazy("post-list")
+
+    def test_func(self):
+        post = self.get.object()
+        return self.request.user == post.author
 
 
-class PostDeleteView(DeleteView):
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
     template_name = "blog/DeleteView.html"
+    success_url = reverse_lazy("post_list")
+
+    def test_func(self):
+        post = self.get.object()
+        return self.request.user == post.author
 
 
 class PostCreateView(CreateView):
