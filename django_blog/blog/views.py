@@ -136,7 +136,7 @@ class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         comment = self.get_object()
         return self.request.user == comment.author
 
-    class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         model = Comment
         template_name = "blog/comment_confirm_delete.html"
 
