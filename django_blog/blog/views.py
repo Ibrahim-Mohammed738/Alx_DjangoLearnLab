@@ -173,3 +173,7 @@ class PostSearchView(ListView):
             ).distinct()  # Avoid duplicate posts if there are multiple matches
         else:
             return Post.objects.all()  # If no query, return all pos ts
+        
+class PostByTagListView(ListView):
+    pass
+            

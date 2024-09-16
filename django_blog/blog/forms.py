@@ -53,3 +53,5 @@ class CommentForm(forms.ModelForm):
             raise forms.ValidationError("this comment is short")
 
         return content
+
+
