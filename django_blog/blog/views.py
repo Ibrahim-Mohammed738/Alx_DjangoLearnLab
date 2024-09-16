@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect, render, get_object_or_404
 from django.http import HttpResponse
-from .forms import UserCreationForm, ProfileForm, PostForm, CommentForm
+from .forms import UserCreationForm, ProfileForm, PostForm, CommentForm,Tag
 from django.views.generic import (
     ListView,
     DetailView,
@@ -85,6 +85,11 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         post = self.get.object()
         return self.request.user == post.author
 
+    def form_invalid(self, form):
+        form.save(user=self.request.user)
+        return super().form_valid(form)
+            
+        
 
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post

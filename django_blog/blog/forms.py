@@ -1,8 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
-from .models import Profile, Post
-from .models import Comment
+from .models import Profile, Post, Comment, Tag
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -20,9 +19,15 @@ class ProfileForm(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
+    tags = forms.ModelMultipleChoiceField(
+        queryset=Tag.objects.all(), required=False, widget=forms.CheckboxSelectMultiple
+    )
+
+    new_tags = forms.CharField(max_length=100, required=False, help_text="enter new tags")
+
     class Meta:
         model = Post
-        fields = ["title", "content"]
+        fields = ["title", "content", "tags", "new_tags"]
 
     def save(self, commit=True, user=None):
         post = super().save(commit=False)
@@ -32,14 +37,15 @@ class PostForm(forms.ModelForm):
             post.save()
         return post
 
+
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
-        fields = ['content']
+        fields = ["content"]
 
     def clean_content(self):
-        content = self.cleaned_data.get('content')
+        content = self.cleaned_data.get("content")
         if len(content) < 5:
-            raise forms.ValidationError("this comment is short")    
+            raise forms.ValidationError("this comment is short")
 
         return content
