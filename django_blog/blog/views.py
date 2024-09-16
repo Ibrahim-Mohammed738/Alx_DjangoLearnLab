@@ -1,4 +1,6 @@
 from collections.abc import Callable
+from django.db.models import Q
+from django.db.models.query import QuerySet
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
@@ -151,3 +153,23 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         def test_func(self):
             comment = self.get_object()
             return self.request.user == comment.author
+
+
+
+class PostSearchView(ListView):
+    model = Post
+    template_name = 'blog/search_results.html'
+    context_object_name = 'posts'
+
+
+    def get_queryset(self) :
+        query = self.request.GET.get('q')
+        if query:
+            # Use Q objects to search across multiple fields (title, content, tags)
+            return Post.objects.filter(
+                Q(title__icontains=query) |  # Search in title
+                Q(content__icontains=query) |  # Search in content
+                Q(tags__name__icontains=query)  # Search in tags (taggit)
+            ).distinct()  # Avoid duplicate posts if there are multiple matches
+        else:
+            return Post.objects.all()  # If no query, return all pos ts

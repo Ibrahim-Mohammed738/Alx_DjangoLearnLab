@@ -37,5 +37,6 @@ urlpatterns = [
     path(
         "comment/<int:pk>/delete/", CommentDeleteView.as_view(), name="comment-delete"
     ),
+    path("search/", PostSearchView.as_view(), name="post-search"),
 ]
 # "comment/<int:pk>/update/", "post/<int:pk>/comments/new/"
