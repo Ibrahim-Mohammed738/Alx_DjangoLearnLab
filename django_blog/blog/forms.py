@@ -24,14 +24,14 @@ class PostForm(forms.ModelForm):
         queryset=Tag.objects.all(), required=False, widget=forms.CheckboxSelectMultiple
     )
 
-    new_tags = forms.CharField(max_length=100, required=False, help_text="enter new tags")
+    new_tags = forms.CharField(
+        max_length=100, required=False, help_text="enter new tags"
+    )
 
     class Meta:
         model = Post
         fields = ["title", "content", "tags", "new_tags"]
-        widgets = {
-            'tags' : TagWidget(attrs={'placeholder':'add tags seprated by commas'})
-        }
+        widgets = {"tags": TagWidget()}
 
     def save(self, commit=True, user=None):
         post = super().save(commit=False)
