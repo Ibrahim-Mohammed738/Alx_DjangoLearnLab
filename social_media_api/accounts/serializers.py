@@ -9,15 +9,15 @@ user = CustomUser
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(max_length=50)
+    username = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ["bio", "profile_picture ", "username", "password"]
+        fields = ["bio", "profile_picture", "username", "password"]
 
     def create(self, validated_data):
-        user = CustomUser.objects.create_user(
+        user = get_user_model().objects.create_user(
             username=validated_data["username"],
             password=validated_data["password"],
             bio=validated_data.get("bio"),
