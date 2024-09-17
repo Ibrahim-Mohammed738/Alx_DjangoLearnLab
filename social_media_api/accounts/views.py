@@ -7,16 +7,17 @@ from rest_framework.response import Response
 from rest_framework import generics, status
 from .models import CustomUser
 from .serializers import CustomUserSerializer
+from rest_framework.permissions import IsAuthenticated
 
 
-class CreateView(generics.CreateAPIView):
+class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
 
     def create(self, request, *args, **kwargs):
         # creating new user with serilaier
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_excetion=True)
+        serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
         # create token
@@ -42,3 +43,10 @@ class LoginView(APIView):
         # If authentication fails, return an error
         return Response({"error": "Invalid username or password"}, status=status.HTTP_400_BAD_REQUEST)
 
+class ProfileView(generics.RetrieveUpdateAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
