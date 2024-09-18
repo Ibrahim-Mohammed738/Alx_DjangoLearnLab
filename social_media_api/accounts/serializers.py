@@ -1,5 +1,3 @@
-# Implement views and serializers in the accounts app for user registration,
-#  login, and token retrieval.
 from rest_framework import serializers
 from .models import CustomUser
 from rest_framework.authtoken.models import Token
@@ -15,6 +13,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ["bio", "profile_picture", "username", "password"]
+
+    def validate_username(self, value):
+        if CustomUser.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Username already exists.")
+        return value    
 
     def create(self, validated_data):
         user = get_user_model().objects.create_user(
