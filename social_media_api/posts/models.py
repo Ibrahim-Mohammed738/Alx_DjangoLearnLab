@@ -4,7 +4,7 @@ from accounts.models import CustomUser
 class Post(models.Model):
     author = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='posts')
     title = models.CharField(max_length=200,blank=False)
-    content = models.TextField(blank=False)
+    content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -15,7 +15,7 @@ class Post(models.Model):
 class Comment(models.Model):
     post = models.ForeignKey(Post,on_delete=models.CASCADE,related_name='comments')
     user = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='comments')
-    content = models.TextField(blank=False)
+    content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
