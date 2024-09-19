@@ -24,24 +24,23 @@ class RegisterView(generics.CreateAPIView):
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LoginView(APIView):
-    def post(self, request):
-        username = request.data.get("username")
-        password = request.data.get("password")
+class LoginView(generics.GenericAPIView):
+    serializer_class = CustomUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        password = request.data.get('password')
 
         user = authenticate(username=username, password=password)
-
         if user:
-            token, _ = Token.objects.get_or_create(user=user)  # Get or create token
-            return Response({"token": token.key})
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key})
+        else:
+            return Response({'error': 'Invalid credentials'}, status=400)
+        
 
-        # If authentication fails, return an error
-        return Response(
-            {"error": "Invalid username or password"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-
+# permissions.IsAuthenticated
 class ProfileView(generics.RetrieveUpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
