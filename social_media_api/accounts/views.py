@@ -6,6 +6,7 @@ from rest_framework import generics, status, serializers
 from .models import CustomUser
 from .serializers import CustomUserSerializer
 from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
 
 
 class RegisterView(generics.CreateAPIView):
@@ -48,3 +49,26 @@ class ProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class FollowUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self,request,username):
+
+        target_user = get_object_or_404(CustomUser,username=username)
+
+        request.user.following.add(target_user)
+        return Response({"message": f'you are now following {target_user.username}'})
+
+class UnfollowUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, username):
+        # Get the user to be unfollowed
+        target_user = get_object_or_404(CustomUser, username=username)
+        
+        # Remove target_user from the current user's following list
+        request.user.following.remove(target_user)
+
+        return Response({"message": f"You have unfollowed {target_user.username}"})

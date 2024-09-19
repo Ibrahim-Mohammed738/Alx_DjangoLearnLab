@@ -3,10 +3,10 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
 from rest_framework.views import View
+from django_filters.rest_framework import DjangoFilterBackend
 
 
-# Using Django REST Framework’s viewsets, set up CRUD
-# operations for both posts and comments in posts/views.py.
+
 class IsOwnerOrReadOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
@@ -23,6 +23,8 @@ class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permissions_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
+    filterset_feilds = ["title", "content"]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
