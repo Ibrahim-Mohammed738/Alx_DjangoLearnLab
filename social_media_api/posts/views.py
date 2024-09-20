@@ -17,7 +17,9 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         return obj.author == request.user
 
 
-class PostViewSet(viewsets.ModelViewSet):
+class FeedListView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         following_users = self.request.user
@@ -25,11 +27,12 @@ class PostViewSet(viewsets.ModelViewSet):
             "-created_at".following.all()
         )
 
+
+class PostViewSet(viewsets.ModelViewSet):
+
+    queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permissions_classes = [
-        IsAuthenticated,
-        IsOwnerOrReadOnly,
-    ]  # "permissions.IsAuthenticated"
+    permissions_classes = [IsAuthenticated, IsOwnerOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_feilds = ["title", "content"]
 

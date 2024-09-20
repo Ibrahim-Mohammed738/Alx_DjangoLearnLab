@@ -79,12 +79,4 @@ class UnfollowUserView(APIView):
 #    "permissions.IsAuthenticated"
 
 
-class FeedListView(generics.ListAPIView):
-    serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        following_users = self.request.user
-        return Post.objects.filter(author__in=following_users).order_by(
-            "-created_at".following.all()
-        )

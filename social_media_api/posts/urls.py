@@ -2,6 +2,7 @@ from django.urls import path, include
 from .views import (
     PostViewSet,
     CommentViewSet,
+    FeedListView,
 )
 from rest_framework.routers import DefaultRouter
 
@@ -16,4 +17,5 @@ urlpatterns = [
     # path("commen/", CommentDetailView.as_view(), name="comment-list-create"),
     # path("comment/<int:pk>/", CommentListCreate.as_view(), name="comment-detail"),
     path("", include(router.urls)),
+    path("feed/", FeedListView.as_view(), name="feed"),
 ]
