@@ -7,6 +7,8 @@ from .models import CustomUser
 from .serializers import CustomUserSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
+from posts.models import Post
+from posts.serializers import PostSerializer
 
 
 class RegisterView(generics.CreateAPIView):
@@ -29,16 +31,16 @@ class LoginView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
+        username = request.data.get("username")
+        password = request.data.get("password")
 
         user = authenticate(username=username, password=password)
         if user:
             token, _ = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key})
+            return Response({"token": token.key})
         else:
-            return Response({'error': 'Invalid credentials'}, status=400)
-        
+            return Response({"error": "Invalid credentials"}, status=400)
+
 
 # permissions.IsAuthenticated
 class ProfileView(generics.RetrieveUpdateAPIView):
@@ -53,12 +55,13 @@ class ProfileView(generics.RetrieveUpdateAPIView):
 class FollowUserView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self,request,username):
+    def post(self, request, username):
 
-        target_user = get_object_or_404(CustomUser,username=username)
+        target_user = get_object_or_404(CustomUser, username=username)
 
         request.user.following.add(target_user)
-        return Response({"message": f'you are now following {target_user.username}'})
+        return Response({"message": f"you are now following {target_user.username}"})
+
 
 class UnfollowUserView(APIView):
     permission_classes = [IsAuthenticated]
@@ -66,8 +69,22 @@ class UnfollowUserView(APIView):
     def post(self, request, username):
         # Get the user to be unfollowed
         target_user = get_object_or_404(CustomUser, username=username)
-        
+
         # Remove target_user from the current user's following list
         request.user.following.remove(target_user)
 
         return Response({"message": f"You have unfollowed {target_user.username}"})
+
+
+#    "permissions.IsAuthenticated"
+
+
+class FeedListView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        following_users = self.request.user
+        return Post.objects.filter(author__in=following_users.following.all()).order_by(
+            "-created_at"
+        )
