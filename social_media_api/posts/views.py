@@ -6,7 +6,6 @@ from rest_framework.views import View
 from django_filters.rest_framework import DjangoFilterBackend
 
 
-
 class IsOwnerOrReadOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
@@ -20,9 +19,17 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
 class PostViewSet(viewsets.ModelViewSet):
 
-    queryset = Post.objects.all()
+    def get_queryset(self):
+        following_users = self.request.user
+        return Post.objects.filter(author__in=following_users.following.all()).order_by(
+            "-created_at"
+        )
+
     serializer_class = PostSerializer
-    permissions_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    permissions_classes = [
+        IsAuthenticated,
+        IsOwnerOrReadOnly,
+    ]  # "permissions.IsAuthenticated"
     filter_backends = [DjangoFilterBackend]
     filterset_feilds = ["title", "content"]
 
