@@ -19,7 +19,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
 class FeedListView(generics.ListAPIView):
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # permissions.IsAuthenticated"
 
     def get_queryset(self):
         following_users = self.request.user
