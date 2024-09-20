@@ -21,8 +21,8 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         following_users = self.request.user
-        return Post.objects.filter(author__in=following_users.following.all()).order_by(
-            "-created_at"
+        return Post.objects.filter(author__in=following_users).order_by(
+            "-created_at".following.all()
         )
 
     serializer_class = PostSerializer
