@@ -1,9 +1,12 @@
-from rest_framework import permissions, generics, viewsets
+from rest_framework import permissions, generics, viewsets, status
 from rest_framework.permissions import IsAuthenticated
-from .models import Post, Comment
-from .serializers import PostSerializer, CommentSerializer
+from .models import Post, Comment, Like
+from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 from rest_framework.views import View
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.http import Http404
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -76,3 +79,50 @@ class CommentViewSet(viewsets.ModelViewSet):
 #     queryset = Comment.objects.all()
 #     serializer_class = CommentSerializer
 #     permission_classes = [IsAuthenticated,IsOWnerOrReadOnly]
+
+
+class LikeList(APIView):
+    permission_classes = [IsAuthenticated]
+
+    # creating a like object
+
+    def get(self, request):
+        like = Like.objects.all()
+        serializer = LikeSerializer(like, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = LikeSerializer(data=request.data)
+        if serializer.is_valid():
+
+            user = request.user
+            post = serializer.validated_data["post"]
+            if Like.objects.filter(user=user, post=post).exists():
+                return Response(
+                    {"error": "you have already like this post."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            serializer.save(user=user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UnlikeDetail(APIView):
+    permission_classes = [IsAuthenticated]
+
+    # delete a like object
+
+    def delete(self, request, post_id):
+        try:
+
+            like = Like.objects.get(user=request.user, post_id=post_id)
+            like.delete()
+            return Response(
+                {"message": "Like removed"}, status=status.HTTP_204_NO_CONTENT
+            )
+        except Like.DoesNotExist:
+
+            return Response(
+                {"error": "Like does not exist"}, status=status.HTTP_400_BAD_REQUEST
+            )

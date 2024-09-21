@@ -3,6 +3,8 @@ from .views import (
     PostViewSet,
     CommentViewSet,
     FeedListView,
+    LikeList,
+    UnlikeDetail,
 )
 from rest_framework.routers import DefaultRouter
 
@@ -18,4 +20,6 @@ urlpatterns = [
     # path("comment/<int:pk>/", CommentListCreate.as_view(), name="comment-detail"),
     path("", include(router.urls)),
     path("feed/", FeedListView.as_view(), name="feed"),
+    path("posts/<int:post_id>/like/", LikeList.as_view(), name="like-post"),
+    path("posts/<int:post_id>/unlike/", UnlikeDetail.as_view(), name="unlike-post"),
 ]
