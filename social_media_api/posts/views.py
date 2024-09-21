@@ -1,12 +1,17 @@
 from rest_framework import permissions, generics, viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from .models import Post, Comment, Like
+from accounts.models import CustomUser
+from accounts.serializers import CustomUserSerializer
 from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 from rest_framework.views import View
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import Http404
+from notifications.models import Notification
+from notifications.serializers import NotificationSerializer
+from django.shortcuts import get_object_or_404
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -25,7 +30,7 @@ class FeedListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]  # permissions.IsAuthenticated"
 
     def get_queryset(self):
-        following_users = self.request.user
+        following_users = self.request.user.following.all()
         return Post.objects.filter(author__in=following_users).order_by(
             "-created_at".following.all()
         )
@@ -35,7 +40,8 @@ class PostViewSet(viewsets.ModelViewSet):
 
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permissions_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
     filter_backends = [DjangoFilterBackend]
     filterset_feilds = ["title", "content"]
 
@@ -50,7 +56,14 @@ class CommentViewSet(viewsets.ModelViewSet):
     permissions_classes = [IsAuthenticated, IsOwnerOrReadOnly]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        comment = serializer.save(user=self.request.user)
+
+        Notification.objects.create(
+            recipient=comment.post.author,
+            actor=self.request.user,
+            verb="commented on",  #
+            target=comment.post,
+        )
 
 
 # class PostListCreate(generics.ListCreateAPIView):
@@ -84,28 +97,29 @@ class CommentViewSet(viewsets.ModelViewSet):
 class LikeList(APIView):
     permission_classes = [IsAuthenticated]
 
-    # creating a like object
-
-    def get(self, request):
-        like = Like.objects.all()
-        serializer = LikeSerializer(like, many=True)
-        return Response(serializer.data)
-
     def post(self, request):
-        serializer = LikeSerializer(data=request.data)
-        if serializer.is_valid():
+        # use get object to fech post id
+        post = generics.get_object_or_404(post, id=request.data.get("post"))
 
-            user = request.user
-            post = serializer.validated_data["post"]
-            if Like.objects.filter(user=user, post=post).exists():
-                return Response(
-                    {"error": "you have already like this post."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+        # check if user already liked the post
+        user = request.user
+        if Like.objects.filter(user=user, post=post).exists:
+            return Response(
+                {"error": "you already liked this post"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # creating like
+        like = Like.objects.create(user=user, post=post)
 
-            serializer.save(user=user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # create notification for post author
+        Notification.objects.create(
+            recipient=post.author,
+            actor=user,
+            verb="liked",
+            target=post,
+        )
+
+        return Response({"message": "post liked"}, status=status.HTTP_201_CREATED)
 
 
 class UnlikeDetail(APIView):
@@ -114,9 +128,10 @@ class UnlikeDetail(APIView):
     # delete a like object
 
     def delete(self, request, post_id):
-        try:
+        post = get_object_or_404(post, pk=post_id)
 
-            like = Like.objects.get(user=request.user, post_id=post_id)
+        try:
+            like = Like.objects.get(user=request.user, post=post)
             like.delete()
             return Response(
                 {"message": "Like removed"}, status=status.HTTP_204_NO_CONTENT
@@ -126,3 +141,20 @@ class UnlikeDetail(APIView):
             return Response(
                 {"error": "Like does not exist"}, status=status.HTTP_400_BAD_REQUEST
             )
+
+
+# posts/views.py doesn't contain: ["generics.get_object_or_404(Post, pk=pk)
+# ", "Like.objects.get_or_create(user=request.user, post=post)
+# ","Notification.objects.create"]
+
+
+class NotificationList(generics.ListAPIView):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class NotificationUpdate(generics.UpdateAPIView):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]

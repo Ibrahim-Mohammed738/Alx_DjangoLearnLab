@@ -4,6 +4,11 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
 
+# posts/views.py doesn't contain: ["generics.get_object_or_404(Post, pk=pk)", "
+# Like.objects.get_
+# or_create(user=request.user, post=post)", "Notification.objects.create"]
+
+
 class Notification(models.Model):
     recipient = models.ForeignKey(
         CustomUser, related_name="notifications", on_delete=models.CASCADE
@@ -11,7 +16,7 @@ class Notification(models.Model):
     actor = models.ForeignKey(
         CustomUser, related_name="actions", on_delete=models.CASCADE
     )
-    verb = models.TextField(max_length=255)
+    verb = ["liked", "commented on", "followed"]
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
 
